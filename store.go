@@ -65,7 +65,8 @@ func (store *dbStore) getFailedResults() ([]*MarginalFailed, error) {
 	rows, err := store.db.Query(`
 		SELECT am.[ampmodel_id],
 			am.[model], 
-			trp.[ampserial_id],  
+			trp.[ampserial_id],
+			bm.[bom_id],  
 			bm.[name], 
 			bi.[bandnumber],
 	 		d.[name], 

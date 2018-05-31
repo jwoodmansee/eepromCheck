@@ -1,7 +1,8 @@
 import React, {Component } from 'react';
 import {Link} from 'react-router-dom';
 import axios from 'axios';
-import Navbar from './Navbar';
+
+import FailedTable from './FailedTable';
 
 class DisplayFailures extends Component {
     constructor(props) {
@@ -27,25 +28,8 @@ class DisplayFailures extends Component {
 
     render() {
         return (
-            <div className='container'>
-            <Navbar />
-                <table className='table table-hover table-bordered container col-lg'>
-                    <thead>
-                        <tr>
-                            <th scope='col'>AmpInfo</th>
-                            <th scope='col'>Test Performed</th>
-                            <th scope='col'>Test Result</th>
-                            <th scope='col'>Test LowerLimit</th>
-                            <th scope='col'>Test UpperLimit</th>
-                            <th scope='col'>Eeprom Result</th>
-                            <th scope='col'>Eeprom LowerLimt</th>
-                            <th scope='col'>Eeprom UpperLimit</th>
-                            <th scope='col'>Tester</th>
-                            <th scope='col'>Jig</th>
-                            <th scope='col'>Date</th>
-                        </tr>
-                    </thead>
-                </table>
+            <div>
+                <FailedTable marginalFails={this.state.marginalFails} />
                 <Link to='/' className='btn btn-primary'>Back</Link>
             </div>
         );

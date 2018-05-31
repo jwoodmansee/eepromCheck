@@ -31,7 +31,7 @@ type MarginalFailed struct {
 	TestName     string  `json:"testName"`
 	Results      float32 `json:"results"`
 	LowerLimit   float32 `json:"lowerLimit"`
-	UpperLimit   float32 `json:uppserLimit"`
+	UpperLimit   float32 `json:"upperLimit"`
 	EepromResult int     `json:"eepromResult"`
 	LowerEeprom  int     `json:"lowerEeprom"`
 	UpperEeprom  int     `json:"upperEeprom"`
@@ -70,6 +70,7 @@ func getFailures(w http.ResponseWriter, r *http.Request) {
 	w.Write(failureListBytes)
 }
 
+//QueryParams ...
 type QueryParams struct {
 	Model string
 	Bom   string
@@ -109,12 +110,12 @@ func FailedResults(w http.ResponseWriter, r *http.Request) {
 
 	fails, err := store.getFailedResults()
 	if err != nil {
-		fmt.Println("Error: %v", err)
+		fmt.Println("Error:", err)
 	}
 
 	failedList, err := json.Marshal(fails)
 	if err != nil {
-		fmt.Println("Error: %v", err)
+		fmt.Println("Error:", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
@@ -133,7 +134,7 @@ func newRouter() *mux.Router {
 func main() {
 	fmt.Println("Starting server...")
 
-	connString := "serverstuff"
+	connString := "server stuff"
 	db, err := sql.Open("mssql", connString)
 
 	if err != nil {

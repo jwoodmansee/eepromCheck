@@ -17,6 +17,7 @@ class GetEepromFailures extends Component {
             responseType: 'json'
         }).then(response => {
             this.setState({ failures: response.data })
+            console.log(this.state.failures)
         }).catch(response => {
             console.log("The issue is ", response.error)
         });
