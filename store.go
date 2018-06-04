@@ -10,6 +10,8 @@ type Store interface {
 	GetFailures() ([]*Failure, error)
 	getFailedResults() ([]*MarginalFailed, error)
 	SetStoreQueryParams(incoming QueryParams)
+	SetTestedQueryParams(tp TestedParams)
+	getTestedResults() ([]*TestedResults, error)
 }
 
 type dbStore struct {
@@ -126,6 +128,72 @@ func (store *dbStore) getFailedResults() ([]*MarginalFailed, error) {
 		fails = append(fails, fail)
 	}
 	return fails, nil
+}
+
+var gTP TestedParams
+
+func (store *dbStore) SetTestedQueryParams(tp TestedParams) {
+	gTP = TestedParams{
+		Model:     tp.Model,
+		Bom:       tp.Bom,
+		Band:      tp.Band,
+		Direction: tp.Direction,
+		TestName:  tp.TestName,
+	}
+	fmt.Println(gTP)
+}
+
+func (store *dbStore) getTestedResults() ([]*TestedResults, error) {
+	rows, err := store.db.Query(`
+	SELECT TOP 20
+	   am.[model]
+	  ,bm.[name]
+      ,trc.[passed]
+      ,bi.[bandnumber]
+	  ,d.[name]
+      ,trc.[name]
+      ,trc.[result]
+	  ,ts.[lowerlimit]
+	  ,ts.[upperlimit]
+      ,trc.[eeprom]
+	  ,ts.[eeprom_lowerlimit]
+	  ,ts.[eeprom_upperlimit]
+  	FROM [Manufacturing].[dbo].[TestResultChild] AS trc
+  	JOIN TestResultParent AS trp on trp.testresultparent_id = trc.testresultparent_id
+  	JOIN Band AS b on b.band_id = trc.band_id
+  	JOIN BandInfo AS bi on bi.bandinfo_id = b.bandinfo_id
+  	JOIN Direction AS d on b.direction_id = d.direction_id
+  	JOIN TestSpec AS ts on ts.testspec_id = trc.testspec_id
+  	JOIN Bom AS bm ON trp.bom_id = bm.bom_id
+	JOIN AmpModel as am on am.ampmodel_id = bm.ampmodel_id
+	WHERE am.[model] =?1 AND bm.[name] =?2 AND bi.[bandnumber] =?3 AND d.[name] =?4 AND trc.[name] =?5 
+	ORDER By trc.testresultchild_id DESC;`, gTP.Model, gTP.Bom, gTP.Band, gTP.Direction, gTP.TestName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	tested := []*TestedResults{}
+	for rows.Next() {
+		test := &TestedResults{}
+		if err := rows.Scan(
+			&test.Model,
+			&test.Bom,
+			&test.Passed,
+			&test.Band,
+			&test.Direction,
+			&test.TestName,
+			&test.Results,
+			&test.LowerLimit,
+			&test.UpperLimit,
+			&test.EepromResult,
+			&test.LowerEeprom,
+			&test.UpperEeprom); err != nil {
+			return nil, err
+		}
+		tested = append(tested, test)
+	}
+	return tested, nil
 }
 
 var store Store

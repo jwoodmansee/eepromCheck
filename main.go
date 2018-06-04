@@ -122,11 +122,85 @@ func FailedResults(w http.ResponseWriter, r *http.Request) {
 	w.Write(failedList)
 }
 
+//TestedResults ...
+type TestedResults struct {
+	Model        string  `json:"model"`
+	Bom          string  `json:"bom"`
+	Band         int     `json:"band"`
+	Passed       string  `json:"passed"`
+	Direction    string  `json:"direction"`
+	TestName     string  `json:"testName"`
+	Results      float32 `json:"results"`
+	LowerLimit   float32 `json:"lowerLimit"`
+	UpperLimit   float32 `json:"upperLimit"`
+	EepromResult int     `json:"eepromResult"`
+	LowerEeprom  int     `json:"lowerEeprom"`
+	UpperEeprom  int     `json:"upperEeprom"`
+}
+
+//TestedParams ...
+type TestedParams struct {
+	Model     string
+	Bom       string
+	Band      string
+	Direction string
+	TestName  string
+}
+
+var tested []TestedResults
+
+func testedResults(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Method: ", r.Method)
+	switch r.Method {
+	case "OPTIONS":
+		// handle preflight
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+
+	case "GET":
+		// respond to actual request
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
+	}
+
+	fmt.Println(r.URL.Path)
+	inputParams := strings.Split(r.URL.Path, "/")
+	fmt.Println(inputParams)
+	if len(inputParams[2:]) > 0 {
+		testParams := inputParams[2:]
+
+		tp := TestedParams{
+			Model:     testParams[0],
+			Bom:       testParams[1],
+			Band:      testParams[3],
+			Direction: testParams[4],
+			TestName:  testParams[2],
+		}
+		store.SetTestedQueryParams(tp)
+	}
+
+	tested, err := store.getTestedResults()
+	if err != nil {
+		fmt.Println("Error:", err)
+	}
+
+	testedList, err := json.Marshal(tested)
+	if err != nil {
+		fmt.Println("Error:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(testedList)
+
+}
+
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/failures", getFailures).Methods("GET")
 	r.HandleFunc("/failures/{modelBom}", FailedResults).Methods("GET")
+	r.HandleFunc("/tested/{model}/{bom}/{testName}/{band}/{direction}", testedResults).Methods("GET")
 
 	return r
 }
