@@ -25,16 +25,14 @@ func (store *dbStore) GetFailures() ([]*Failure, error) {
 			bm.[name]
 		FROM[Manufacturing].[dbo].[TestResultChild] AS trc
 		JOIN TestResultParent AS trp on trp.testresultparent_id = trc.testresultparent_id
-        JOIN TestSpec AS ts on ts.testspec_id = trc.testspec_id
-        JOIN Bom AS bm ON trp.bom_id = bm.bom_id
-        JOIN AmpModel as am on am.ampmodel_id = bm.ampmodel_id
-        JOIN TestStation as test on trp.teststation_id = test.teststation_id
+		JOIN TestSpec AS ts on ts.testspec_id = trc.testspec_id
+		JOIN Bom AS bm ON trp.bom_id = bm.bom_id
+		JOIN AmpModel as am on am.ampmodel_id = bm.ampmodel_id
+		JOIN TestStation as test on trp.teststation_id = test.teststation_id
 		WHERE Cast(datetime as date) = CAST(GETDATE() as date)
 		AND (eeprom = eeprom_lowerlimit OR eeprom = eeprom_upperlimit)
-        AND ((result < lowerlimit AND lowerlimit - result < 2) OR(result > upperlimit AND result - upperlimit < 2))
-        ORDER By am.[model] DESC;
-		`)
-
+		AND ((result < lowerlimit AND lowerlimit - result < 2) OR(result > upperlimit AND result - upperlimit < 2))
+		ORDER By am.[model] DESC;`)
 	if err != nil {
 		return nil, err
 	}
@@ -145,29 +143,30 @@ func (store *dbStore) SetTestedQueryParams(tp TestedParams) {
 
 func (store *dbStore) getTestedResults() ([]*TestedResults, error) {
 	rows, err := store.db.Query(`
-	SELECT TOP 20
-	   am.[model]
-	  ,bm.[name]
-      ,trc.[passed]
-      ,bi.[bandnumber]
-	  ,d.[name]
-      ,trc.[name]
-      ,trc.[result]
-	  ,ts.[lowerlimit]
-	  ,ts.[upperlimit]
-      ,trc.[eeprom]
-	  ,ts.[eeprom_lowerlimit]
-	  ,ts.[eeprom_upperlimit]
-  	FROM [Manufacturing].[dbo].[TestResultChild] AS trc
-  	JOIN TestResultParent AS trp on trp.testresultparent_id = trc.testresultparent_id
-  	JOIN Band AS b on b.band_id = trc.band_id
-  	JOIN BandInfo AS bi on bi.bandinfo_id = b.bandinfo_id
-  	JOIN Direction AS d on b.direction_id = d.direction_id
-  	JOIN TestSpec AS ts on ts.testspec_id = trc.testspec_id
-  	JOIN Bom AS bm ON trp.bom_id = bm.bom_id
-	JOIN AmpModel as am on am.ampmodel_id = bm.ampmodel_id
-	WHERE am.[model] =?1 AND bm.[name] =?2 AND bi.[bandnumber] =?3 AND d.[name] =?4 AND trc.[name] =?5 
-	ORDER By trc.testresultchild_id DESC;`, gTP.Model, gTP.Bom, gTP.Band, gTP.Direction, gTP.TestName)
+		SELECT TOP 20
+	   		 am.[model]
+	  		,bm.[name]
+      		,trc.[passed]
+      		,bi.[bandnumber]
+	  		,d.[name]
+      		,trc.[name]
+      		,trc.[result]
+	  		,ts.[lowerlimit]
+	  		,ts.[upperlimit]
+      		,trc.[eeprom]
+	  		,ts.[eeprom_lowerlimit]
+	  		,ts.[eeprom_upperlimit]
+  		FROM [Manufacturing].[dbo].[TestResultChild] AS trc
+  		JOIN TestResultParent AS trp on trp.testresultparent_id = trc.testresultparent_id
+  		JOIN Band AS b on b.band_id = trc.band_id
+  		JOIN BandInfo AS bi on bi.bandinfo_id = b.bandinfo_id
+  		JOIN Direction AS d on b.direction_id = d.direction_id
+  		JOIN TestSpec AS ts on ts.testspec_id = trc.testspec_id
+  		JOIN Bom AS bm ON trp.bom_id = bm.bom_id
+		JOIN AmpModel as am on am.ampmodel_id = bm.ampmodel_id
+		WHERE am.[model] =?1 AND bm.[name] =?2 AND bi.[bandnumber] =?3 AND d.[name] =?4 AND trc.[name] =?5
+		AND trc.passed = 1 
+		ORDER By trc.testresultchild_id DESC;`, gTP.Model, gTP.Bom, gTP.Band, gTP.Direction, gTP.TestName)
 	if err != nil {
 		return nil, err
 	}
