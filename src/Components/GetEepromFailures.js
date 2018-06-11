@@ -13,7 +13,7 @@ class GetEepromFailures extends Component {
     componentWillMount() {
         axios({
             method: 'get',
-            url: 'http://localhost:8080/failures',
+            url: 'http://localhost:6060/failures',
             responseType: 'json'
         }).then(response => {
             this.setState({ failures: response.data })

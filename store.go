@@ -154,7 +154,7 @@ func (store *dbStore) getTestedResults() ([]*TestedResults, error) {
 			ts.[upperlimit],
 			trc.[eeprom],
 			ts.[eeprom_lowerlimit],
-			ts.[eeprom_upperlimit],
+			ts.[eeprom_upperlimit]
 		FROM [Manufacturing].[dbo].[TestResultChild] AS trc
 		JOIN TestResultParent AS trp on trp.testresultparent_id = trc.testresultparent_id
 		JOIN Band AS b on b.band_id = trc.band_id
