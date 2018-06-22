@@ -143,7 +143,7 @@ func (store *dbStore) SetTestedQueryParams(tp TestedParams) {
 
 func (store *dbStore) getTestedResults() ([]*TestedResults, error) {
 	rows, err := store.db.Query(`
-		SELECT TOP 20
+		SELECT TOP 15
 			am.[model],
 			bm.[name],
 			trc.[passed],

@@ -5,13 +5,9 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import TestedPassedResults from './TestedPassedResults';
 
-
-//import FailedTable from './FailedTable';
-
 var pM = {
     margin: '50px, 550px, 0px, 550px'
 }
-
 
 class DisplayFailures extends Component {
     constructor(props) {
@@ -20,11 +16,10 @@ class DisplayFailures extends Component {
         this.state = {
             marginalFails: [],
             testResults: []
-            // passedView: false
         }
 
         this.onRowClick = this.onRowClick.bind(this)
-        // this.viewPassedResults = this.viewPassedResults.bind(this)
+        this.refresh = this.refresh.bind(this)
     }
 
     componentDidMount() {
@@ -35,6 +30,22 @@ class DisplayFailures extends Component {
             responseType: 'json'
         }).then(response => {
             this.setState({ marginalFails: response.data })
+        }).catch(error => {
+            console.log("The error is:", error)
+        });
+    }
+
+    refresh(){
+        let param = this.props.match.params.modelBom;
+        axios({
+            method: 'get',
+            url: `http://localhost:6060/failures/${param}`,
+            responseType: 'json'
+        }).then(response => {
+            this.setState({ 
+                marginalFails: response.data,
+                testResults: []
+             })
         }).catch(error => {
             console.log("The error is:", error)
         });
@@ -55,40 +66,14 @@ class DisplayFailures extends Component {
                     responseType: 'json'
                 }).then(response => {
                     this.setState({ testResults: response.data })
-                }).catch(error => {
-                    console.log('Error is Not good:', error)
-                });
+                }).catch();
             }
         }
     }
 
-    // viewPassedResults() {
-    //     let testResults = this.state.testResults;
-    //     console.log(testResults)
-    //     if (this.state.passedView) {
-    //         return (
-    //             <div>
-    //                 <div className='modal-body'>
-    //                     <TestedPassedResults testResults={this.state.testResults} />
-    //                 </div>
-    //                 <div className="modal-footer">
-    //                     <button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
-    //                     <button
-    //                         onClick={() => { this.setState({ passedView: false }) }}
-    //                         type="button"
-    //                         className="btn btn-primary"
-    //                     >
-    //                     Back
-    //                     </button>
-    //                 </div>
-    //             </div>
-    //         )
-    //     }
-    // }
-
     render() {
         const { marginalFails } = this.state;
-        return (
+         return (
             <div className='container'>
                 <h2 className='text-center'>Failed Amps</h2>
                 <ReactTable 
@@ -161,6 +146,7 @@ class DisplayFailures extends Component {
                     style={{height: "400px"}}
                 />
                 <Link to='/' className='btn btn-primary'>Back</Link>
+                <button className='btn btn-success' onClick={this.refresh}>Reload</button>
                 <TestedPassedResults testResults={this.state.testResults} />
                 
             </div>

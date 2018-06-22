@@ -223,6 +223,6 @@ func main() {
 	InitStore(&dbStore{db: db})
 
 	r := newRouter()
-	fmt.Println("Serving on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD"}), handlers.AllowedOrigins([]string{"*"}))(r)))
+	fmt.Println("Serving on port 6060")
+	log.Fatal(http.ListenAndServe(":6060", handlers.CORS(handlers.AllowedMethods([]string{"GET", "POST", "PUT", "HEAD"}), handlers.AllowedOrigins([]string{"*"}))(r)))
 }

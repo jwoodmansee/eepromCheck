@@ -38,6 +38,7 @@ class Buttons extends React.Component {
             let model = fail.model;
             let bom = fail.bom;
             let modelBom = model + bom;
+            if (model == null) return <h3>There no amps that currently meet the failed criteria!</h3>
             return (
                 <div className='container' key={date}>
                     <li className='list-unstyled container'>
@@ -47,8 +48,10 @@ class Buttons extends React.Component {
                     </li>
                 </div>
             )
+            console.log(button)
         });
         return button;
+        
     }
 
     render() {
